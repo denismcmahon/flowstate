@@ -18,8 +18,10 @@ app.use(cookieParser());
 app.use('/api/auth', authRouter);
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
+const PORT = Number(process.env.PORT) || 4000;
+
 connectDB().then(() => {
-    app.listen(process.env.port, () => 
-        console.log(`Server running at http://localhost:${process.env.PORT}`)
-    );
+  app.listen(PORT, "0.0.0.0", () =>
+    console.log(`Server running at http://localhost:${PORT}`)
+  );
 });
