@@ -1,0 +1,12 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* hides any unwanted scrollbars */
+}
+
+body {
+  background-color: #fff; /* optional, prevents white flash behind images */
+}
