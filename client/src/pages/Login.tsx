@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Button, Card, CardContent, TextField, Typography, Alert } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import loginBg from "../assets/login-bg.jpg";
 
 const schema = z.object({
@@ -14,9 +14,13 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function Login() {
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const nav = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) nav("/");
+  }, [user, nav]);
 
   const {
     register,

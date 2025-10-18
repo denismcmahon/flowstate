@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,9 +15,13 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function Register() {
-  const { register: registerUser } = useAuth();
+  const { user, register: registerUser } = useAuth();
   const nav = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) nav("/");
+  }, [user, nav]);
 
   const {
     register,

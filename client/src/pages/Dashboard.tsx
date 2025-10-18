@@ -1,14 +1,15 @@
-import { Box, Typography } from "@mui/material";
+import DashboardLayout from "../layouts/DashboardLayout";
+import { Typography } from "@mui/material";
 
 export default function Dashboard() {
   return (
-    <Box sx={{ p: 4 }}>
+    <DashboardLayout>
       <Typography variant="h4" fontWeight={600}>
-        Welcome to FlowState
+        Welcome back!
       </Typography>
       <Typography sx={{ mt: 2 }}>
-        This is your blank dashboard — we’ll add planner, habits, and Pomodoro here later.
+        This is your central hub — planner, habits, focus, and journal will live here.
       </Typography>
-    </Box>
+    </DashboardLayout>
   );
 }
