@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import { connectDB } from './config/db';
 import authRouter from './routes/auth';
+import tasksRouter from './routes/tasks';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
+app.use('/api/tasks', tasksRouter);
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
 const PORT = Number(process.env.PORT) || 4000;
