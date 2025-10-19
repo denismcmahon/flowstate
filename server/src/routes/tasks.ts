@@ -11,7 +11,7 @@ const createSchema = z.object({
     title: z.string().min(1),
     notes: z.string().optional(),
     isFocus: z.boolean().optional(),
-    date: z.string().optional
+    date: z.string().optional()
 });
 
 router.get('/', async (req: AuthRequest, res) => {
@@ -24,7 +24,7 @@ router.post('/', async (req: AuthRequest, res) => {
     const parsed = createSchema.safeParse(req.body);
     if(!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
     const date = parsed.data.date || dayjs().format('YYYY-MM-DD');
-    const task = await Task.create({ ...parsed.data, date, userId, req.user!.id });
+    const task = await Task.create({ ...parsed.data, date, userId: req.user!.id });
     res.status(201).json(task);
 });
 
@@ -45,4 +45,4 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     res.json({ ok: true });
 });
 
-export default Router;
+export default router;
