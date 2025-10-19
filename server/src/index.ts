@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import { connectDB } from './config/db';
 import authRouter from './routes/auth';
 import tasksRouter from './routes/tasks';
+import pomodoroRouter from './routes/pomodoros';
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
 app.use('/api/tasks', tasksRouter);
+app.use('/api/pomodoros', pomodoroRouter);
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
 const PORT = Number(process.env.PORT) || 4000;
