@@ -65,7 +65,7 @@ export default function PomodoroPanel({ task, onClose, onComplete }: Props) {
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: { xs: '100%', sm: 400 },
+          width: { xs: '100%', sm: 600 },
           p: 3,
           bgcolor: '#f9fafc',
           boxShadow: '-4px 0 12px rgba(0,0,0,0.1)'
@@ -100,7 +100,7 @@ export default function PomodoroPanel({ task, onClose, onComplete }: Props) {
           <CircularProgress
             variant="determinate"
             value={(timeLeft / (WORK_DURATION * 60)) * 100}
-            size={220}
+            size={350}
             thickness={3}
           />
           <Box
@@ -115,7 +115,7 @@ export default function PomodoroPanel({ task, onClose, onComplete }: Props) {
               justifyContent: 'center'
             }}
           >
-            <Typography variant="h3" fontWeight={700}>
+            <Typography variant="h2" fontWeight={700}>
               {mins}:{secs.toString().padStart(2, '0')}
             </Typography>
           </Box>
