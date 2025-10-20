@@ -21,6 +21,7 @@ import PomodoroTimer from '../components/PomodoroTimer';
 export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState('');
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const loadTasks = async () => {
     try {
@@ -109,7 +110,13 @@ export default function Dashboard() {
             </Typography>
             {task.isFocus && !task.completed && (
               <Box sx={{ ml: 5, mt: 1 }}>
-                <PomodoroTimer taskId={task._id} onComplete={loadTasks} />
+                <PomodoroTimer
+                  taskId={task._id}
+                  taskTitle={task.title}
+                  taskNotes={task.notes}
+                  onComplete={loadTasks}
+                  disableAll={!!activeTask && activeTask._id !== task._id}
+                />
               </Box>
             )}
           </ListItem>
