@@ -22,7 +22,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     api.get('/auth/me')
-      .then(res => setUser(res.data.user))
+      .then(res => setUser(res.data))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
