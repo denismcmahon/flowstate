@@ -23,6 +23,9 @@ export default function Dashboard() {
   const [title, setTitle] = useState('');
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
+  const focusedTasks = tasks.filter((t) => t.isFocus);
+  const otherTasks = tasks.filter((t) => !t.isFocus);
+
   const loadTasks = async () => {
     try {
       const fetchedTasks = await getTasks();
@@ -88,39 +91,93 @@ export default function Dashboard() {
         sx={{ mb: 2 }}
       />
 
-      <List sx={{ maxWidth: 720 }}>
-        {tasks.map((task) => (
-          <ListItem
-            key={task._id}
-            secondaryAction={
-              <Box>
-                <IconButton onClick={() => toggleFocus(task)} title="Mark as focus">
-                  {task.isFocus ? <StarFilledIcon /> : <StarIcon />}
-                </IconButton>
-
-                <IconButton onClick={() => removeTask(task._id)} title="Delete task">
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            }
+      {/* Focused Tasks Section */}
+      {focusedTasks.length > 0 && (
+        <>
+          <Typography variant="h6" fontWeight={600} sx={{ mt: 4, mb: 1 }}>
+            Focused Tasks
+          </Typography>
+          <List
+            sx={{
+              maxWidth: 720,
+              border: '1px solid rgba(25,118,210,0.3)',
+              borderRadius: 2,
+              backgroundColor: '#f3f9ff',
+              mb: 4
+            }}
           >
-            <Checkbox checked={task.completed} onChange={() => toggleCompleted(task)} />
-            <Typography sx={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
-              {task.title}
-            </Typography>
-            {task.isFocus && !task.completed && (
-              <Box sx={{ ml: 5, mt: 1 }}>
-                <PomodoroTimer
-                  taskId={task._id}
-                  taskTitle={task.title}
-                  taskNotes={task.notes}
-                  onComplete={loadTasks}
-                  disableAll={!!activeTask && activeTask._id !== task._id}
-                />
-              </Box>
-            )}
-          </ListItem>
-        ))}
+            {focusedTasks.map((task) => (
+              <ListItem
+                key={task._id}
+                secondaryAction={
+                  <Box>
+                    <IconButton onClick={() => toggleFocus(task)} title="Remove from focus">
+                      <StarFilledIcon color="primary" />
+                    </IconButton>
+                    <IconButton onClick={() => removeTask(task._id)} title="Delete task">
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                }
+              >
+                <Checkbox checked={task.completed} onChange={() => toggleCompleted(task)} />
+                <Typography
+                  sx={{
+                    textDecoration: task.completed ? 'line-through' : 'none',
+                    fontWeight: 500
+                  }}
+                >
+                  {task.title}
+                </Typography>
+
+                {!task.completed && (
+                  <Box sx={{ ml: 5, mt: 1 }}>
+                    <PomodoroTimer
+                      taskId={task._id}
+                      taskTitle={task.title}
+                      taskNotes={task.notes}
+                      onComplete={loadTasks}
+                      disableAll={!!activeTask && activeTask._id !== task._id}
+                    />
+                  </Box>
+                )}
+              </ListItem>
+            ))}
+          </List>
+        </>
+      )}
+
+      {/* Other Tasks Section */}
+      <Typography variant="h6" fontWeight={600} sx={{ mt: 2, mb: 1 }}>
+        All Tasks
+      </Typography>
+      <List sx={{ maxWidth: 720 }}>
+        {otherTasks.length > 0 ? (
+          otherTasks.map((task) => (
+            <ListItem
+              key={task._id}
+              secondaryAction={
+                <Box>
+                  <IconButton onClick={() => toggleFocus(task)} title="Mark as focus">
+                    <StarIcon />
+                  </IconButton>
+                  <IconButton onClick={() => removeTask(task._id)} title="Delete task">
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
+              }
+            >
+              <Checkbox checked={task.completed} onChange={() => toggleCompleted(task)} />
+              <Typography sx={{ textDecoration: task.completed ? 'line-through' : 'none' }}>
+                {task.title}
+              </Typography>
+            </ListItem>
+          ))
+        ) : (
+          <Typography color="text.secondary" sx={{ pl: 2 }}>
+            No other tasks yet.
+          </Typography>
+        )}
       </List>
     </DashboardLayout>
   );
