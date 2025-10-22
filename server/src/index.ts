@@ -8,6 +8,7 @@ import { connectDB } from './config/db';
 import authRouter from './routes/auth';
 import tasksRouter from './routes/tasks';
 import pomodoroRouter from './routes/pomodoros';
+import habitRouter from './routes/habits';
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRouter);
 app.use('/api/tasks', tasksRouter);
 app.use('/api/pomodoros', pomodoroRouter);
+app.use("/api/habits", habitRouter);
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
 const PORT = Number(process.env.PORT) || 4000;
