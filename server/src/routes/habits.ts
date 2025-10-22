@@ -24,11 +24,14 @@ router.post('/', async (req: AuthRequest, res) => {
 });
 
 router.patch('/:id/toggle', async (req: AuthRequest, res) => {
+    console.log('DM ==> backend ==> toggleHabit');
     const today = dayjs().format('YYYY-MM-DD');
     const habit = await Habit.findOne({ _id: req.params.id, userId: req.user!.id });
+    console.log('DM ==> backend ==> toggleHabit ==> habit: ', habit);
     if(!habit) return res.status(404).json({ error: 'Habit not found' });
 
     const isCompleted = habit.completedDates.includes(today);
+    console.log('DM ==> backend ==> toggleHabit ==> isCompleted: ', isCompleted);
     if(isCompleted) {
         habit.completedDates = habit.completedDates.filter((day) => day !== today);
     } else {
