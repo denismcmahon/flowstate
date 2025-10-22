@@ -33,9 +33,24 @@ export default function Habits() {
     };
 
     const toggleHabitDone = async (id: string) => {
-        console.log('DM ==> toggleHabitDone');
-        await toggleHabit(id);
-        loadHabits();
+        const today = new Date().toISOString().slice(0, 10);
+
+        setHabits((prev) =>
+            prev.map((h) =>
+            h._id === id
+                ? {
+                    ...h,
+                    completedDates: h.completedDates.includes(today)
+                    ? h.completedDates.filter((d) => d !== today)
+                    : [...h.completedDates, today],
+                }
+                : h
+            )
+        );
+
+        toggleHabit(id).catch(() => {
+            loadHabits();
+        });
     };
 
     const today = new Date().toISOString().slice(0, 10);
@@ -71,6 +86,7 @@ export default function Habits() {
                 {habits.length > 0 ? (
                     habits.map((habit) => {
                         const done = habit.completedDates.includes(today);
+                        console.log('DM ==> done: ', done);
                         return (
                             <ListItem
                                 key={habit._id}
