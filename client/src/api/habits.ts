@@ -3,6 +3,7 @@ import { api } from './axios';
 export type Habit = {
     _id: string;
     name: string;
+    category?: string;
     completedDates: string[];
     createdAt: string;
     updatedAt: string;
