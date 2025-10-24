@@ -5,6 +5,7 @@ export type Habit = {
     name: string;
     category?: string;
     completedDates: string[];
+    weeklyTarget: number;
     createdAt: string;
     updatedAt: string;
 };
@@ -18,7 +19,7 @@ export const createHabit = (name: string) =>
 export const toggleHabit = (id: string) => 
     api.patch<Habit>(`/habits/${id}/toggle`).then((response) => response.data);
 
-export const updateHabit = (id: string, data: Partial<{ name: string; category: string }>) => 
+export const updateHabit = (id: string, data: Partial<{ name: string; category: string; weeklyTarget: number }>) => 
     api.put<Habit>(`/habits/${id}`, data).then((response) => response.data);
 
 export const deleteHabit = (id: string) => 
