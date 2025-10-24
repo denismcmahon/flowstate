@@ -1,17 +1,37 @@
 import DashboardLayout from '../layouts/DashboardLayout';
 import { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Button, Checkbox, Paper, Grid, Card } from '@mui/material';
-import { getHabits, createHabit, toggleHabit } from '../api/habits';
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Checkbox,
+  Paper,
+  Grid,
+  Card,
+  IconButton
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  getHabits,
+  createHabit,
+  toggleHabit,
+  updateHabit,
+  deleteHabit as deleteHabitApi,
+  toggleHabitDate
+} from '../api/habits';
 import type { Habit } from '../api/habits';
 import dayjs from 'dayjs';
 
+type HabitUI = Habit & { isEditing?: boolean; editName?: string };
+
 export default function Habits() {
-  const [habits, setHabits] = useState<Habit[]>([]);
+  const [habits, setHabits] = useState<HabitUI[]>([]);
   const [habitName, setHabitName] = useState('');
 
   const loadHabits = async () => {
     const data = await getHabits();
-    setHabits(data);
+    setHabits(data.map((habit) => ({ ...habit })));
   };
 
   useEffect(() => {
@@ -29,21 +49,60 @@ export default function Habits() {
     const today = new Date().toISOString().slice(0, 10);
 
     setHabits((prev) =>
-      prev.map((h) =>
-        h._id === id
+      prev.map((habit) =>
+        habit._id === id
           ? {
-              ...h,
-              completedDates: h.completedDates.includes(today)
-                ? h.completedDates.filter((d) => d !== today)
-                : [...h.completedDates, today]
+              ...habit,
+              completedDates: habit.completedDates.includes(today)
+                ? habit.completedDates.filter((d) => d !== today)
+                : [...habit.completedDates, today]
             }
-          : h
+          : habit
       )
     );
 
-    toggleHabit(id).catch(() => {
+    toggleHabit(id).catch(() => loadHabits());
+  };
+
+  const beginEdit = (id: string) => {
+    setHabits((prev) =>
+      prev.map((habit) => (habit._id === id ? { ...habit, isEditing: true, editName: habit.name } : habit))
+    );
+  };
+
+  const changeEditName = (id: string, name: string) => {
+    setHabits((prev) =>
+      prev.map((habit) => (habit._id === id ? { ...habit, editName: name } : habit))
+    );
+  };
+
+  const commitEdit = async (id: string) => {
+    const target = habits.find((habit) => habit._id === id);
+    if (!target) return;
+    const newName = (target.editName ?? target.name).trim();
+    if (!newName) return;
+    setHabits((prev) =>
+      prev.map((habit) =>
+        habit._id === id
+          ? { ...habit, name: newName, isEditing: false, editName: undefined }
+          : habit
+      )
+    );
+    try {
+      await updateHabit(id, { name: newName });
+    } catch {
       loadHabits();
-    });
+    }
+  };
+
+  const deleteHabit = async (id: string) => {
+    const prev = habits;
+    setHabits(habits.filter((habit) => habit._id !== id));
+    try {
+      await deleteHabitApi(id);
+    } catch {
+      setHabits(prev);
+    }
   };
 
   const today = new Date().toISOString().slice(0, 10);
@@ -70,7 +129,6 @@ export default function Habits() {
     const today = dayjs().format('YYYY-MM-DD');
     const isDone = completedDates.includes(date);
     const isFuture = dayjs(date).isAfter(today, 'day');
-
     if (isDone) return '#28a745';
     if (isFuture) return 'rgba(128, 128, 128, 0.4)';
     return 'rgba(255, 99, 71, 0.8)';
@@ -144,16 +202,7 @@ export default function Habits() {
         Completed today: {completedCount}/{habits.length}
       </Typography>
 
-      <Grid
-        container
-        spacing={3}
-        sx={{
-          width: '100%',
-          maxWidth: 'none',
-          mt: 2,
-          pr: 2
-        }}
-      >
+      <Grid container spacing={3} sx={{ width: '100%', maxWidth: 'none', mt: 2, pr: 2 }}>
         {habits.length > 0 ? (
           habits.map((habit) => {
             const done = habit.completedDates.includes(today);
@@ -189,16 +238,35 @@ export default function Habits() {
                       mb: 2
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: 1 }}>
                       <Checkbox checked={done} onClick={() => toggleHabitDone(habit._id)} />
-                      <Box>
-                        <Typography variant="h6" fontWeight={600}>
+                      {habit.isEditing ? (
+                        <TextField
+                          size="small"
+                          value={habit.editName || ''}
+                          onChange={(e) => changeEditName(habit._id, e.target.value)}
+                          onBlur={() => commitEdit(habit._id)}
+                          onKeyDown={(e) => e.key === 'Enter' && commitEdit(habit._id)}
+                          autoFocus
+                        />
+                      ) : (
+                        <Typography
+                          variant="h6"
+                          fontWeight={600}
+                          sx={{ cursor: 'pointer' }}
+                          onClick={() => beginEdit(habit._id)}
+                        >
                           {habit.name}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {habit.category || 'General'}
-                        </Typography>
-                      </Box>
+                      )}
+                      <IconButton
+                        onClick={() => deleteHabit(habit._id)}
+                        size="small"
+                        color="error"
+                        sx={{ ml: 'auto' }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
                     </Box>
 
                     <Box
@@ -247,9 +315,31 @@ export default function Habits() {
                             fontWeight: 600,
                             color: '#fff',
                             backgroundColor: bgColor,
-                            border: isToday ? '2px solid #fff' : '1px solid rgba(255,255,255,0.2)',
+                            border: isToday
+                              ? '2px solid #fff'
+                              : '1px solid rgba(255,255,255,0.2)',
                             transition: 'transform 0.15s ease',
+                            cursor: 'pointer',
                             '&:hover': { transform: 'scale(1.07)' }
+                          }}
+                          onClick={async () => {
+                            setHabits((prev) =>
+                              prev.map((habit) =>
+                                habit._id === habit._id
+                                  ? {
+                                      ...habit,
+                                      completedDates: habit.completedDates.includes(date)
+                                        ? habit.completedDates.filter((d) => d !== date)
+                                        : [...habit.completedDates, date]
+                                    }
+                                  : habit
+                              )
+                            );
+                            try {
+                              await toggleHabitDate(habit._id, date);
+                            } catch {
+                              loadHabits();
+                            }
                           }}
                           title={dayjs(date).format('dddd')}
                         >

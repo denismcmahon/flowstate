@@ -23,3 +23,7 @@ export const updateHabit = (id: string, data: Partial<{ name: string; category: 
 
 export const deleteHabit = (id: string) => 
     api.delete<{ success: boolean }>(`/habits/${id}`).then((response) => response.data);
+
+export const toggleHabitDate = (id: string, date: string) =>
+  api.post<Habit>(`/habits/${id}/toggle/${date}`).then((response) => response.data);
+
