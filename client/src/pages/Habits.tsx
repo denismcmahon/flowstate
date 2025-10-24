@@ -324,15 +324,15 @@ export default function Habits() {
                           }}
                           onClick={async () => {
                             setHabits((prev) =>
-                              prev.map((habit) =>
-                                habit._id === habit._id
+                              prev.map((h) =>
+                                h._id === habit._id
                                   ? {
-                                      ...habit,
-                                      completedDates: habit.completedDates.includes(date)
-                                        ? habit.completedDates.filter((d) => d !== date)
-                                        : [...habit.completedDates, date]
+                                      ...h,
+                                      completedDates: h.completedDates.includes(date)
+                                        ? h.completedDates.filter((d) => d !== date)
+                                        : [...h.completedDates, date]
                                     }
-                                  : habit
+                                  : h
                               )
                             );
                             try {
