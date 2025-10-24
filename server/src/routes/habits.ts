@@ -7,35 +7,47 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/', async (req: AuthRequest, res) => {
-  const habits = await Habit.find({ userId: req.user!.id }).sort({ createdAt: -1 });
-  res.json(habits);
+  try {
+    const habits = await Habit.find({ userId: req.user!.id }).sort({ createdAt: -1 });
+    res.json(habits);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch habits' });
+  }
 });
 
 router.post('/', async (req: AuthRequest, res) => {
-  const { name } = req.body;
-  if (!name || name.trim() === '') return res.status(400).json({ error: 'Name required' });
+  try { 
+    const { name } = req.body;
+    if (!name || name.trim() === '') return res.status(400).json({ error: 'Name required' });
 
-  const habit = await Habit.create({
-    userId: req.user!.id,
-    name: name.trim()
-  });
+    const habit = await Habit.create({
+      userId: req.user!.id,
+      name: name.trim()
+    });
 
-  res.status(201).json(habit);
+    res.status(201).json(habit);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create habi' });
+  }
 });
 
 router.patch('/:id/toggle', async (req: AuthRequest, res) => {
-  const today = dayjs().format('YYYY-MM-DD');
-  const habit = await Habit.findOne({ _id: req.params.id, userId: req.user!.id });
-  if (!habit) return res.status(404).json({ error: 'Habit not found' });
+  try {
+    const today = dayjs().format('YYYY-MM-DD');
+    const habit = await Habit.findOne({ _id: req.params.id, userId: req.user!.id });
+    if (!habit) return res.status(404).json({ error: 'Habit not found' });
 
-  const isCompleted = habit.completedDates.includes(today);
-  if (isCompleted) {
-    habit.completedDates = habit.completedDates.filter((day) => day !== today);
-  } else {
-    habit.completedDates.push(today);
+    const isCompleted = habit.completedDates.includes(today);
+    if (isCompleted) {
+      habit.completedDates = habit.completedDates.filter((day) => day !== today);
+    } else {
+      habit.completedDates.push(today);
+    }
+
+    await habit.save();
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to toggle habit' });
   }
-
-  await habit.save();
 });
 
 router.post('/:id/toggle/:date', requireAuth, async (req: AuthRequest, res) => {
@@ -75,7 +87,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
     );
     res.json(updated);
   } catch (err) {
-    res.status(500).json
+    res.status(500).json({ error: 'Failed to update habit' });
   }
 });
 
