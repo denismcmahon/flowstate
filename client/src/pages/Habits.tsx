@@ -9,7 +9,11 @@ import {
   Paper,
   Grid,
   Card,
-  IconButton
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
@@ -66,7 +70,9 @@ export default function Habits() {
 
   const beginEdit = (id: string) => {
     setHabits((prev) =>
-      prev.map((habit) => (habit._id === id ? { ...habit, isEditing: true, editName: habit.name } : habit))
+      prev.map((habit) =>
+        habit._id === id ? { ...habit, isEditing: true, editName: habit.name } : habit
+      )
     );
   };
 
@@ -207,8 +213,14 @@ export default function Habits() {
           habits.map((habit) => {
             const done = habit.completedDates.includes(today);
             const week = getCurrentWeek();
-            const completedDays = week.filter((d) => habit.completedDates.includes(d)).length;
-            const completionRate = Math.round((completedDays / 7) * 100);
+            const completedDaysThisWeek = week.filter((d) =>
+              habit.completedDates.includes(d)
+            ).length;
+            const target = Math.max(0, Math.min(7, habit.weeklyTarget ?? 7));
+            const denominator = target === 0 ? 7 : target; // if 0 target, show relative to full week OR keep 0 to avoid /0
+            const rateRaw =
+              denominator === 0 ? 0 : Math.min(1, completedDaysThisWeek / denominator);
+            const completionRate = Math.round(rateRaw * 100);
 
             return (
               <Grid item xs={12} sm={6} md={6} lg={6} xl={6} key={habit._id}>
@@ -283,10 +295,36 @@ export default function Habits() {
                         {completionRate}%
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        week
+                        {completedDaysThisWeek}/{target || 0} wk
                       </Typography>
                     </Box>
                   </Box>
+
+                  <FormControl size="small" sx={{ minWidth: 150, mr: 1 }}>
+                    <InputLabel id={`target-label-${habit._id}`}>Target</InputLabel>
+                    <Select
+                      labelId={`target-label-${habit._id}`}
+                      label="Target"
+                      value={habit.weeklyTarget ?? 7}
+                      onChange={async (e) => {
+                        const value = Number(e.target.value);
+                        setHabits((prev) =>
+                          prev.map((h) => (h._id === habit._id ? { ...h, weeklyTarget: value } : h))
+                        );
+                        try {
+                          await updateHabit(habit._id, { weeklyTarget: value });
+                        } catch {
+                          loadHabits();
+                        }
+                      }}
+                    >
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <MenuItem key={i} value={i}>
+                          {i} day{i === 1 ? '' : 's'}/week
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
 
                   <Box
                     sx={{
@@ -315,9 +353,7 @@ export default function Habits() {
                             fontWeight: 600,
                             color: '#fff',
                             backgroundColor: bgColor,
-                            border: isToday
-                              ? '2px solid #fff'
-                              : '1px solid rgba(255,255,255,0.2)',
+                            border: isToday ? '2px solid #fff' : '1px solid rgba(255,255,255,0.2)',
                             transition: 'transform 0.15s ease',
                             cursor: 'pointer',
                             '&:hover': { transform: 'scale(1.07)' }

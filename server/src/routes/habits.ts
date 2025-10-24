@@ -67,6 +67,16 @@ router.put('/:id', async (req: AuthRequest, res) => {
     if(name !== undefined) updateDoc.name = name;
     if(category !== undefined) updateDoc.category = category;
     if(weeklyTarget !== undefined) updateDoc.weeklyTarget = Math.max(0, Math.min(7, Number(weeklyTarget)));
+
+    const updated = await Habit.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user!.id },
+      updateDoc,
+      { new: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json
+  }
 });
 
 router.delete('/:id', async (req: AuthRequest, res) => {
