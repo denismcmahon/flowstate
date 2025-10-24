@@ -17,3 +17,9 @@ export const createHabit = (name: string) =>
 
 export const toggleHabit = (id: string) => 
     api.patch<Habit>(`/habits/${id}/toggle`).then((response) => response.data);
+
+export const updateHabit = (id: string, data: Partial<{ name: string; category: string }>) => 
+    api.put<Habit>(`/habits/${id}`, data).then((response) => response.data);
+
+export const deleteHabit = (id: string) => 
+    api.delete<{ success: boolean }>(`/habits/${id}`).then((response) => response.data);
