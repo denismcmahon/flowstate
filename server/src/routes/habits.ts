@@ -24,14 +24,11 @@ router.post('/', async (req: AuthRequest, res) => {
 });
 
 router.patch('/:id/toggle', async (req: AuthRequest, res) => {
-    console.log('DM ==> backend ==> toggleHabit');
     const today = dayjs().format('YYYY-MM-DD');
     const habit = await Habit.findOne({ _id: req.params.id, userId: req.user!.id });
-    console.log('DM ==> backend ==> toggleHabit ==> habit: ', habit);
     if(!habit) return res.status(404).json({ error: 'Habit not found' });
 
     const isCompleted = habit.completedDates.includes(today);
-    console.log('DM ==> backend ==> toggleHabit ==> isCompleted: ', isCompleted);
     if(isCompleted) {
         habit.completedDates = habit.completedDates.filter((day) => day !== today);
     } else {
@@ -39,6 +36,29 @@ router.patch('/:id/toggle', async (req: AuthRequest, res) => {
     }
 
     await habit.save();
+});
+
+router.put(':/id', async (req: AuthRequest, res) => {
+    try {
+        const { name, category } = req.body;
+        const updated = await Habit.findByIdAndUpdate(
+            { _id: req.params.id, userId: req.user!.id },
+            { ...(name && {name}), ...(category && { category }) },
+            { new: true }
+        );
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update habit' });
+    }
+});
+
+router.delete('/:id', async (req: AuthRequest, res) => {
+    try {
+        await Habit.findOneAndDelete({ _id: req.params.id, userId: req.user!.id });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to delete habit' });
+    }
 });
 
 export default router;
