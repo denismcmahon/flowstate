@@ -62,16 +62,11 @@ router.post('/:id/toggle/:date', requireAuth, async (req: AuthRequest, res) => {
 
 router.put('/:id', async (req: AuthRequest, res) => {
   try {
-    const { name, category } = req.body;
-    const updated = await Habit.findByIdAndUpdate(
-      { _id: req.params.id, userId: req.user!.id },
-      { ...(name && { name }), ...(category && { category }) },
-      { new: true }
-    );
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update habit' });
-  }
+    const { name, category, weeklyTarget } = req.body;
+    const updateDoc: any = {};
+    if(name !== undefined) updateDoc.name = name;
+    if(category !== undefined) updateDoc.category = category;
+    if(weeklyTarget !== undefined) updateDoc.weeklyTarget = Math.max(0, Math.min(7, Number(weeklyTarget)));
 });
 
 router.delete('/:id', async (req: AuthRequest, res) => {
