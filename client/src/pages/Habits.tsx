@@ -221,6 +221,7 @@ export default function Habits() {
             const rateRaw =
               denominator === 0 ? 0 : Math.min(1, completedDaysThisWeek / denominator);
             const completionRate = Math.round(rateRaw * 100);
+            const metTarget = target > 0 && completedDaysThisWeek >= target;
 
             return (
               <Grid item xs={12} sm={6} md={6} lg={6} xl={6} key={habit._id}>
@@ -239,7 +240,8 @@ export default function Habits() {
                     '&:hover': {
                       transform: 'translateY(-3px)',
                       boxShadow: '0 6px 20px rgba(0,0,0,0.12)'
-                    }
+                    },
+                    background: metTarget ? 'rgba(40, 167, 69, 0.25)' : 'rgba(255,255,255,0.05)'
                   }}
                 >
                   <Box
