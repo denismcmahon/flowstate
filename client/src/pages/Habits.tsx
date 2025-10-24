@@ -1,6 +1,6 @@
 import DashboardLayout from '../layouts/DashboardLayout';
 import { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Button, List, ListItem, Checkbox, Paper } from '@mui/material';
+import { Box, Typography, TextField, Button, Checkbox, Paper, Grid, Card } from '@mui/material';
 import { getHabits, createHabit, toggleHabit } from '../api/habits';
 import type { Habit } from '../api/habits';
 import dayjs from 'dayjs';
@@ -144,76 +144,122 @@ export default function Habits() {
         Completed today: {completedCount}/{habits.length}
       </Typography>
 
-      <List sx={{ maxWidth: 720 }}>
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          width: '100%',
+          maxWidth: 'none',
+          mt: 2,
+          pr: 2
+        }}
+      >
         {habits.length > 0 ? (
           habits.map((habit) => {
             const done = habit.completedDates.includes(today);
+            const week = getCurrentWeek();
+            const completedDays = week.filter((d) => habit.completedDates.includes(d)).length;
+            const completionRate = Math.round((completedDays / 7) * 100);
 
             return (
-              <ListItem
-                key={habit._id}
-                sx={{
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 2,
-                  mb: 2,
-                  p: 2,
-                  background: 'rgba(255,255,255,0.02)'
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                  <Checkbox checked={done} onClick={() => toggleHabitDone(habit._id)} />
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography fontWeight={600}>{habit.name}</Typography>
-                    {habit.category && (
-                      <Typography variant="body2" color="text.secondary">
-                        {habit.category}
-                      </Typography>
-                    )}
-                  </Box>
-                </Box>
-
-                <Box
+              <Grid item xs={12} sm={6} md={6} lg={6} xl={6} key={habit._id}>
+                <Card
                   sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(7, 1fr)',
-                    gap: 0.8,
-                    mt: 2,
-                    width: '100%',
-                    maxWidth: 260
+                    p: 3,
+                    borderRadius: 3,
+                    bgcolor: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    height: 220,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
+                    transition: 'all 0.25s ease',
+                    '&:hover': {
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.12)'
+                    }
                   }}
                 >
-                  {getCurrentWeek().map((date) => {
-                    const isDone = habit.completedDates.includes(date);
-                    const dayLabel = dayjs(date).format('dd');
-                    const isToday = date === today;
-
-                    return (
-                      <Box
-                        key={date}
-                        sx={{
-                          height: 28,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 1,
-                          fontSize: '0.7rem',
-                          fontWeight: 600,
-                          color: '#fff',
-                          backgroundColor: getDayColor(date, habit.completedDates),
-                          border: isToday ? '2px solid #fff' : '1px solid rgba(255,255,255,0.2)',
-                          transition: 'transform 0.15s ease',
-                          '&:hover': { transform: 'scale(1.06)' }
-                        }}
-                        title={dayjs(date).format('dddd')}
-                      >
-                        {dayLabel}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      justifyContent: 'space-between',
+                      mb: 2
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Checkbox checked={done} onClick={() => toggleHabitDone(habit._id)} />
+                      <Box>
+                        <Typography variant="h6" fontWeight={600}>
+                          {habit.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {habit.category || 'General'}
+                        </Typography>
                       </Box>
-                    );
-                  })}
-                </Box>
-              </ListItem>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        textAlign: 'center',
+                        background: 'rgba(255,255,255,0.05)',
+                        borderRadius: 2,
+                        px: 2,
+                        py: 1,
+                        minWidth: 60
+                      }}
+                    >
+                      <Typography variant="body1" fontWeight={600}>
+                        {completionRate}%
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        week
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(7, 1fr)',
+                      gap: 1,
+                      width: '100%',
+                      alignSelf: 'center'
+                    }}
+                  >
+                    {getCurrentWeek().map((date) => {
+                      const dayLabel = dayjs(date).format('dd');
+                      const isToday = date === today;
+                      const bgColor = getDayColor(date, habit.completedDates);
+
+                      return (
+                        <Box
+                          key={date}
+                          sx={{
+                            height: 38,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 1,
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#fff',
+                            backgroundColor: bgColor,
+                            border: isToday ? '2px solid #fff' : '1px solid rgba(255,255,255,0.2)',
+                            transition: 'transform 0.15s ease',
+                            '&:hover': { transform: 'scale(1.07)' }
+                          }}
+                          title={dayjs(date).format('dddd')}
+                        >
+                          {dayLabel}
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Card>
+              </Grid>
             );
           })
         ) : (
@@ -221,7 +267,7 @@ export default function Habits() {
             No habits yet. Add your first one above!
           </Typography>
         )}
-      </List>
+      </Grid>
     </DashboardLayout>
   );
 }
