@@ -16,7 +16,7 @@ const createSchema = z.object({
 
 router.get('/', async (req: AuthRequest, res) => {
     const currentDate = (req.query.date as string) || dayjs().format('YYYY-MM-DD');
-    const tasks = await Task.find({ userId: req.user!.id, date: currentDate }).sort({ createdAt: 1 });
+    const tasks = await Task.find({ userId: req.user!.id }).sort({ createdAt: 1 });
     res.json(tasks);
 });
 

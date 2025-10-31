@@ -91,11 +91,10 @@ export default function Dashboard() {
         sx={{ mb: 2 }}
       />
 
-      {/* Focused Tasks Section */}
       {focusedTasks.length > 0 && (
         <>
           <Typography variant="h6" fontWeight={600} sx={{ mt: 4, mb: 1 }}>
-            Focused Tasks
+            Daily Focus
           </Typography>
           <List
             sx={{
@@ -108,48 +107,60 @@ export default function Dashboard() {
           >
             {focusedTasks.map((task) => (
               <ListItem
-                key={task._id}
-                secondaryAction={
-                  <Box>
-                    <IconButton onClick={() => toggleFocus(task)} title="Remove from focus">
-                      <StarFilledIcon color="primary" />
-                    </IconButton>
-                    <IconButton onClick={() => removeTask(task._id)} title="Delete task">
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                }
-              >
-                <Checkbox checked={task.completed} onChange={() => toggleCompleted(task)} />
-                <Typography
-                  sx={{
-                    textDecoration: task.completed ? 'line-through' : 'none',
-                    fontWeight: 500
-                  }}
-                >
-                  {task.title}
-                </Typography>
+  key={task._id}
+  sx={{
+    display: 'grid',
+    gridTemplateColumns: 'auto 1fr 200px auto auto',
+    alignItems: 'center',
+    gap: 2,
+    py: 1
+  }}
+>
+  <Checkbox checked={task.completed} onChange={() => toggleCompleted(task)} />
 
-                {!task.completed && (
-                  <Box sx={{ ml: 5, mt: 1 }}>
-                    <PomodoroTimer
-                      taskId={task._id}
-                      taskTitle={task.title}
-                      taskNotes={task.notes}
-                      onComplete={loadTasks}
-                      disableAll={!!activeTask && activeTask._id !== task._id}
-                    />
-                  </Box>
-                )}
-              </ListItem>
+  <Typography
+    sx={{
+      textDecoration: task.completed ? 'line-through' : 'none',
+      fontWeight: 500,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      pr: 2
+    }}
+  >
+    {task.title}
+  </Typography>
+
+  {!task.completed ? (
+    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <PomodoroTimer
+        taskId={task._id}
+        taskTitle={task.title}
+        taskNotes={task.notes}
+        onComplete={loadTasks}
+        disableAll={!!activeTask && activeTask._id !== task._id}
+      />
+    </Box>
+  ) : (
+    <Box /> // keeps column alignment consistent even when no button
+  )}
+
+  <IconButton onClick={() => toggleFocus(task)} title="Remove from focus">
+    <StarFilledIcon color="primary" />
+  </IconButton>
+
+  <IconButton onClick={() => removeTask(task._id)} title="Delete task">
+    <DeleteIcon />
+  </IconButton>
+</ListItem>
+
             ))}
           </List>
         </>
       )}
 
-      {/* Other Tasks Section */}
       <Typography variant="h6" fontWeight={600} sx={{ mt: 2, mb: 1 }}>
-        All Tasks
+        Tasks List
       </Typography>
       <List sx={{ maxWidth: 720 }}>
         {otherTasks.length > 0 ? (
