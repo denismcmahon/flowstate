@@ -8,9 +8,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const nav = useNavigate();
 
   const menu = [
-    { label: "Today", path: "/" },
+    { label: "Today's Focus", path: "/" },
     { label: "Habits", path: "/habits" },
-    { label: "Pomodoro", path: "/focus" },
+    { label: "Exercise Schedule", path: "/focus" },
     { label: "Journal", path: "/journal" },
   ];
 
